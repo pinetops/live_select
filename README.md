@@ -13,7 +13,8 @@ interface for search-like functionalities with type-ahead. `LiveSelect`s feature
 * Single as well as multiple selection
 * Options to configure the behaviour, such as minimum number of characters that trigger an update or the maximum number of selectable options
 * Default styles for daisyUI and tailwindcss, which are fully customizable and can be completely overridden if needed
-* Ability to customize the rendered HTML for dropdown entries and tags using slots.
+* Ability to customize the rendered HTML for dropdown entries and tags using slots
+* **NEW**: Client-side keyboard navigation option for instant response (no server round-trip)
 
 ### [Try it in the showcase app](https://live-select.fly.dev/) 🔬
 
@@ -76,6 +77,18 @@ _In the LiveView or LiveComponent that's the target of your form events:_
 
 Refer to the [module documentation](https://hexdocs.pm/live_select/LiveSelect.html) for the details, and
 check out the [cheatsheet](https://hexdocs.pm/live_select/cheatsheet.html) for some useful tips.
+
+## Client-side Keyboard Navigation ⚡
+
+By default, LiveSelect sends every arrow key press to the server, which can feel sluggish on high-latency connections. 
+You can enable client-side keyboard navigation for instant response:
+
+```elixir
+<.live_select field={@form[:city_search]} keyboard_actions={:hook} />
+```
+
+With `keyboard_actions={:hook}`, arrow key navigation happens entirely in the browser without any server round-trips,
+providing a much snappier user experience. The server is only notified when the user makes a selection.
 
 ## Installation 📦
 

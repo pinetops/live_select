@@ -77,6 +77,11 @@ defmodule LiveSelectWeb.ShowcaseLive do
         default: Component.default_opts()[:mode]
       )
 
+      field(:keyboard_actions, Ecto.Enum,
+        values: [:server, :hook],
+        default: Component.default_opts()[:keyboard_actions]
+      )
+
       field(:new, :boolean, default: true)
       field(:placeholder, :string, default: "Search for a city")
       field(:search_delay, :integer, default: 10)
@@ -104,6 +109,7 @@ defmodule LiveSelectWeb.ShowcaseLive do
           :max_selectable,
           :user_defined_options,
           :mode,
+          :keyboard_actions,
           :options,
           :selection,
           :placeholder,

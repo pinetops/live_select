@@ -40,10 +40,23 @@ export default {
         },
         attachDomEventHandlers() {
             this.textInput().onkeydown = (event) => {
-                if (event.code === "Enter") {
-                    event.preventDefault()
+                if (this.keyboardMode === "server") {
+                    if (event.code === "Enter") {
+                        event.preventDefault()
+                    }
+                    this.pushEventTo(this.el, 'keydown', {key: event.code})
+                } else if (this.keyboardMode === "hook") {
+                    // Handle keyboard navigation client-side
+                    if (event.key === "ArrowDown") {
+                        this.moveFocus(1, event)
+                    } else if (event.key === "ArrowUp") {
+                        this.moveFocus(-1, event)
+                    } else if (event.key === "Enter") {
+                        this.selectFocused(event)
+                    } else if (event.key === "Escape") {
+                        this.handleEscape(event)
+                    }
                 }
-                this.pushEventTo(this.el, 'keydown', {key: event.code})
             }
             this.changeEvents = debounce((id, field, text) => {
                 this.pushEventTo(this.el, "change", {text})
@@ -74,6 +87,76 @@ export default {
                 }
             })
         },
+        dropdown() {
+            return this.el.querySelector("ul")
+        },
+        getActiveOptionClasses() {
+            const classesString = this.el.dataset.activeOptionClasses || ""
+            return classesString.split(" ").filter(cls => cls.trim() !== "")
+        },
+        moveFocus(delta, evt) {
+            evt.preventDefault()
+            evt.stopPropagation()
+            const dropdown = this.dropdown()
+            if (!dropdown) return
+            
+            const opts = dropdown.querySelectorAll("div[data-idx]")
+            if (!opts.length) return
+            
+            // Get all selectable options (those with data-idx)
+            const selectableOptions = Array.from(opts)
+            if (selectableOptions.length === 0) return
+            
+            // Get active option classes from server
+            const activeOptionClasses = this.getActiveOptionClasses()
+            
+            // Find currently active option by looking for active classes
+            let currentIdx = -1
+            selectableOptions.forEach((opt, index) => {
+                const hasActiveClass = activeOptionClasses.some(cls => opt.classList.contains(cls))
+                if (hasActiveClass) {
+                    currentIdx = index
+                }
+            })
+            
+            // Calculate new index
+            let newIdx
+            if (delta > 0) {
+                // Moving down
+                newIdx = currentIdx < selectableOptions.length - 1 ? currentIdx + 1 : 0
+            } else {
+                // Moving up
+                newIdx = currentIdx > 0 ? currentIdx - 1 : selectableOptions.length - 1
+            }
+            
+            // Remove active classes from all options
+            selectableOptions.forEach(opt => {
+                activeOptionClasses.forEach(cls => opt.classList.remove(cls))
+            })
+            
+            // Add active classes to the new option
+            const newOption = selectableOptions[newIdx]
+            if (newOption) {
+                activeOptionClasses.forEach(cls => newOption.classList.add(cls))
+                newOption.scrollIntoView({block: "nearest"})
+                
+                // Store the active index for selection
+                this.activeIdx = parseInt(newOption.dataset.idx)
+            }
+        },
+        selectFocused(evt) {
+            evt.preventDefault()
+            evt.stopPropagation()
+            
+            if (this.activeIdx !== undefined) {
+                this.pushEventTo(this.el, 'option_click', {idx: String(this.activeIdx)})
+            }
+        },
+        handleEscape(evt) {
+            evt.preventDefault()
+            evt.stopPropagation()
+            this.pushEventTo(this.el, 'keydown', {key: "Escape"})
+        },
         setInputValue(value) {
             this.textInput().value = value
         },
@@ -82,6 +165,7 @@ export default {
             this.el.querySelector(selector).dispatchEvent(new Event('input', {bubbles: true}))
         },
         mounted() {
+            this.keyboardMode = this.el.dataset.keyboard || "server";
             this.maybeStyleClearButton()
             this.handleEvent("parent_event", ({id, event, payload}) => {
                 if (this.el.id === id) {
@@ -116,6 +200,8 @@ export default {
             this.attachDomEventHandlers()
         },
         updated() {
+            // Re-read keyboard mode in case it changed
+            this.keyboardMode = this.el.dataset.keyboard || "server";
             this.maybeStyleClearButton()
             this.attachDomEventHandlers()
         },

@@ -43,7 +43,8 @@ defmodule LiveSelect.Component do
     text_input_extra_class: nil,
     text_input_selected_class: nil,
     update_min_len: 1,
-    value: nil
+    value: nil,
+    keyboard_actions: :server
   ]
 
   @styles [

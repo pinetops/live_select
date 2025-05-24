@@ -540,6 +540,49 @@ defmodule LiveSelect.ComponentTest do
            ]
   end
 
+  test "renders data-keyboard attribute with default value", %{form: form} do
+    component =
+      render_component(&LiveSelect.live_select/1,
+        field: form[:city_search]
+      )
+      |> Floki.parse_document!()
+
+    assert Floki.attribute(component, "div[phx-hook='LiveSelect']", "data-keyboard") == ["server"]
+  end
+
+  test "renders data-keyboard attribute with custom value", %{form: form} do
+    component =
+      render_component(&LiveSelect.live_select/1,
+        field: form[:city_search],
+        keyboard_actions: :hook
+      )
+      |> Floki.parse_document!()
+
+    assert Floki.attribute(component, "div[phx-hook='LiveSelect']", "data-keyboard") == ["hook"]
+  end
+
+  test "omits phx-keydown when keyboard_actions is :hook", %{form: form} do
+    component =
+      render_component(&LiveSelect.live_select/1,
+        field: form[:city_search],
+        keyboard_actions: :hook
+      )
+      |> Floki.parse_document!()
+
+    assert Floki.attribute(component, "div[phx-hook='LiveSelect']", "phx-keydown") == []
+  end
+
+  test "includes phx-keydown when keyboard_actions is :server", %{form: form} do
+    component =
+      render_component(&LiveSelect.live_select/1,
+        field: form[:city_search],
+        keyboard_actions: :server
+      )
+      |> Floki.parse_document!()
+
+    assert Floki.attribute(component, "div[phx-hook='LiveSelect']", "phx-keydown") == ["keydown"]
+  end
+
   for style <- [nil] do
     @style style
 

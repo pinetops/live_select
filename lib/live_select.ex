@@ -426,6 +426,12 @@ defmodule LiveSelect do
     doc:
       "the minimum length of text in the text input field that will trigger an update of the dropdown."
 
+  attr :keyboard_actions, :atom,
+    values: [:server, :hook],
+    default: Component.default_opts()[:keyboard_actions],
+    doc:
+      "controls where keyboard navigation is processed. `:server` (default) sends events to the LiveView, `:hook` handles navigation entirely in JavaScript for instant response"
+
   attr :style, :atom,
     values: [:tailwind, :daisyui, :none],
     default: Component.default_opts()[:style],

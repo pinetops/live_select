@@ -1,3 +1,8 @@
+## Unreleased
+
+### Added
+* `keyboard_actions` option – set to `:hook` to move Arrow key navigation into the JS hook, eliminating round-trip latency.
+
 ## 1.6.0 (2025-04-13)
 
 * add ability to disable options
